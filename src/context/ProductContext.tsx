@@ -41,12 +41,6 @@ const normalizeProduct = (item: any): Product => {
       item.selling_price ??
       0
     ),
-    selling_price: Number(
-      item.sellingPrice ??
-      item.selling_price ??
-      0
-    ),
-
     imageUrl,
     images: item.images || [], // <-- ADD THIS
 
@@ -73,6 +67,25 @@ const normalizeProduct = (item: any): Product => {
     sub_category_id:
       item.sub_category_id ??
       item.subCategoryId,
+      category_hierarchy: item.category_hierarchy,
+      hsn_code: item.hsn_code,
+      gst_percentage: item.gst_percentage,
+      quality_tier_description: item.quality_tier_description,
+      brand_authorisation_letter: item.brand_authorisation_letter,
+
+    product_code: item.product_code ?? "",
+    brand_name: item.brand_name ?? "",
+    mrp: item.mrp !== undefined && item.mrp !== null ? Number(item.price) : undefined,
+    selling_price: Number(item.selling_price ?? item.sellingPrice ?? 0),
+    stock_quantity: Number(item.stock_quantity ?? item.stockQuantity ?? 0),
+    quality_tier: item.quality_tier ?? "Budget Quality",
+    available_sizes: Array.isArray(item.available_sizes) ? item.available_sizes : [],
+    available_colors: Array.isArray(item.available_colors) ? item.available_colors : [],
+    weight: item.weight ?? "",
+    dimensions: item.dimensions ?? "",
+    specifications: Array.isArray(item.specifications) ? item.specifications : [],
+    created_at: item.created_at,
+    updated_at: item.updated_at,
   };
 };
 /**
@@ -81,6 +94,7 @@ const normalizeProduct = (item: any): Product => {
 type ProductUpdateData = Partial<Product> & {
   images?: File[];
   existingImages?: string[];
+  [key: string]: any;
 };
 
 const buildUpdateFormData = (data: ProductUpdateData) => {
@@ -98,6 +112,10 @@ const buildUpdateFormData = (data: ProductUpdateData) => {
 
     if (value instanceof Date) {
       formData.append(key, value.toISOString());
+    } else if (value instanceof File || value instanceof Blob) {
+      formData.append(key, value);
+    } else if (typeof value === "object") {
+      formData.append(key, JSON.stringify(value));
     } else {
       formData.append(key, String(value));
     }

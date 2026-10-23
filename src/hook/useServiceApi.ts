@@ -8,6 +8,12 @@ export function useServiceApi() {
     return res.data;
   };
 
+  const getServiceBookings = async () => {
+    const res = await api.get(`/vendors/service-booking`);
+    return res.data;
+  };
+
+
 const createService = async (data: FormData) => {
   const res = await api.post(`/vendors/services`, data, {
     headers: {
@@ -29,6 +35,7 @@ const createService = async (data: FormData) => {
 
   return {
     getServices,
+    getServiceBookings,
     createService,
     updateService,
     deleteService,

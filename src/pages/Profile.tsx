@@ -8,9 +8,6 @@ function Profile() {
 
   <MobileSliderNav />
 
-  <Navigation
-   
-  />
   <VendorProfile />
   </div>
   )

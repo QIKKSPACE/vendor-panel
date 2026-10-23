@@ -13,12 +13,13 @@ import {
   PlusCircle,
   ShoppingCart,
   CalendarPlus,
-
+  Sparkles,
   LogOutIcon,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../context/UserContext";
 
-type Section = "dashboard" | "products" | "services" | "promotion" | "profile";
+type Section = "dashboard" | "products" | "services" | "promotion" | "profile" | "packages";
 
 const SidebarNav: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,24 +32,29 @@ const SidebarNav: React.FC = () => {
   useEffect(() => setIsOpen(false), [location.pathname]);
 
   const mainNavigationItems = [
-  
+     { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { id: "products", label: "Products", icon: Package },
     { id: "services", label: "Services", icon: Wrench },
-   
+    { id: "packages", label: "Packages & Offers", icon: Sparkles, path: "/packages" },
+     { id: "kyc", label: "KYC Details", icon: ShieldCheck, path: "/kyc" },
+  
     { id: "profile", label: "Profile", icon: User, path: "/profile" },
   ];
 
   const subNavigation: Record<Section, Array<{ label: string; path: string; icon: any }>> = {
     dashboard: [],
-   
     profile: [],
+    promotion: [],
+    packages: [],
     products: [
       { label: "All Products", path: "/products/all", icon: ClipboardList },
       { label: "Add Product", path: "/products/add", icon: PlusCircle },
+      { label: "Packages & Bundles", path: "/packages", icon: Sparkles },
       { label: "Product Orders", path: "/products/orders", icon: ShoppingCart },
     ],
     services: [
       { label: "Add Service", path: "/services/add", icon: PlusCircle },
+      { label: "Service Combos", path: "/packages", icon: Sparkles },
       { label: "Service Orders", path: "/services/orders", icon: ShoppingCart },
       { label: "Add Slots", path: "/services/slots", icon: CalendarPlus },
     ],

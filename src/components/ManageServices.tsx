@@ -20,8 +20,8 @@ export default function ManageServices() {
     duration_minutes: "",
     images: [] as File[],
     previewImages: [] as string[],
-    quality_tier: "Budget Quality", // Added state mapping for quality tiers
-
+    quality_tier: "Budget Quality",
+    home_visit_available: false, // Added state for Home Visit Available
   });
 
   /** ---------------- IMAGE UPLOAD HANDLER ---------------- */
@@ -66,7 +66,8 @@ export default function ManageServices() {
     formData.append("discount_price", serviceForm.discount);
     formData.append("duration_minutes", serviceForm.duration_minutes);
     formData.append("quality_tier", serviceForm.quality_tier);
-
+    // Append boolean value as string ('true' or 'false') for backend FormData compatibility
+    formData.append("home_visit_available", String(serviceForm.home_visit_available));
 
     // append images as files
     serviceForm.images.forEach((file) => {
@@ -83,44 +84,44 @@ export default function ManageServices() {
     resetForm();
   };
 
-const resetForm = () => {
-  setServiceForm({
-    category_id: "",
-    name: "",
-    description: "",
-    price: "",
-    discount: "",
-    duration_minutes: "60",
-    images: [],
-    previewImages: [],
-    quality_tier: "Budget Quality", // Added state mapping for quality tiers
+  const resetForm = () => {
+    setServiceForm({
+      category_id: "",
+      name: "",
+      description: "",
+      price: "",
+      discount: "",
+      duration_minutes: "60",
+      images: [],
+      previewImages: [],
+      quality_tier: "Budget Quality",
+      home_visit_available: false,
+    });
 
-  });
-
-  setShowServiceForm(false);
-};
+    setShowServiceForm(false);
+  };
 
   /** ---------------- EDIT SERVICE ---------------- */
   const startEdit = (service: any) => {
-  setEditingService(service.id);
+    setEditingService(service.id);
 
-  setServiceForm({
-    category_id: String(service.category_id || ""),
-    name: service.name,
-    description: service.description || "",
-    price: String(service.price),
-    discount: service.discount_price
-      ? String(service.discount_price)
-      : "",
-    duration_minutes: String(service.duration_minutes),
-    images: [],
-    previewImages: service.images || [],
-    quality_tier: "Budget Quality", // Added state mapping for quality tiers
+    setServiceForm({
+      category_id: String(service.category_id || ""),
+      name: service.name,
+      description: service.description || "",
+      price: String(service.price),
+      discount: service.discount_price
+        ? String(service.discount_price)
+        : "",
+      duration_minutes: String(service.duration_minutes),
+      images: [],
+      previewImages: service.images || [],
+      quality_tier: service.quality_tier || "Budget Quality",
+      home_visit_available: Boolean(service.home_visit_available), // Map existing value if present
+    });
 
-  });
-
-  setShowServiceForm(true);
-};
+    setShowServiceForm(true);
+  };
 
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
@@ -179,24 +180,25 @@ const resetForm = () => {
               }
             />
           </div>
-         <select
-  className="border p-2 rounded-lg w-full"
-  value={serviceForm.category_id}
-  onChange={(e) =>
-    setServiceForm({
-      ...serviceForm,
-      category_id: e.target.value,
-    })
-  }
->
-  <option value="">Select Service Category</option>
+          
+          <select
+            className="border p-2 rounded-lg w-full"
+            value={serviceForm.category_id}
+            onChange={(e) =>
+              setServiceForm({
+                ...serviceForm,
+                category_id: e.target.value,
+              })
+            }
+          >
+            <option value="">Select Service Category</option>
+            {vendorSettings?.services?.map((service) => (
+              <option key={service.id} value={service.id}>
+                {service.name}
+              </option>
+            ))}
+          </select>
 
-  {vendorSettings?.services?.map((service) => (
-    <option key={service.id} value={service.id}>
-      {service.name}
-    </option>
-  ))}
-</select>
           {/* Description */}
           <textarea
             className="border p-2 rounded-lg w-full"
@@ -205,10 +207,30 @@ const resetForm = () => {
             onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
           />
 
+          {/* Home Visit Available Toggle */}
+          <div className="flex items-center justify-between border p-3 rounded-lg bg-gray-50">
+            <div>
+              <label className="text-sm font-semibold text-gray-700 block">Home Visit Available</label>
+              <span className="text-xs text-gray-500">Enable if this service can be provided at the customer's home</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setServiceForm({ ...serviceForm, home_visit_available: !serviceForm.home_visit_available })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                serviceForm.home_visit_available ? 'bg-black' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  serviceForm.home_visit_available ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Image Upload */}
           <div>
              <section className="space-y-3">
-            
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Quality Tier</label>
                 <div className="grid grid-cols-3 gap-3">
@@ -229,7 +251,8 @@ const resetForm = () => {
                 </div>
               </div>
             </section>
-            <label className="text-sm text-gray-700 mb-2 flex gap-2 items-center">
+            
+            <label className="text-sm text-gray-700 mb-2 mt-4 flex gap-2 items-center">
               <ImagePlus size={18} /> Service Images (Multiple Allowed)
             </label>
 
@@ -240,14 +263,15 @@ const resetForm = () => {
               onChange={addImages}
               className="border p-2 rounded-lg w-full cursor-pointer"
             />
-  <div className="mt-4 bg-gray-50 border-l-4 border-black p-3 rounded-r-xl text-xs text-gray-600 font-medium">
+            <div className="mt-4 bg-gray-50 border-l-4 border-black p-3 rounded-r-xl text-xs text-gray-600 font-medium">
               💡 select Aspect ratio 3/4 or image 1080*1920 px for best result
             </div>
+            
             {/* Preview Images */}
             <div className="flex flex-wrap gap-3 mt-3">
               {serviceForm.previewImages.map((img, index) => (
                 <div key={index} className="relative w-20 h-20">
-                  <img  src={`https://api.thegroome.com${img.image_url}`} className="w-full h-full object-cover rounded-lg" />
+                  <img src={`https://api.thegroome.com${img.image_url}`} className="w-full h-full object-cover rounded-lg" />
                   <button
                     onClick={() => removeImage(index)}
                     className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1"
@@ -257,7 +281,6 @@ const resetForm = () => {
                 </div>
               ))}
             </div>
-            
           </div>
 
           {/* Submit */}
@@ -297,20 +320,27 @@ const resetForm = () => {
  
               <p className="text-sm text-gray-500">{s.description}</p>
 
-              <p className="text-black font-semibold flex items-center gap-1">
-                <IndianRupee size={16} />
-                {s.discount ? (
-                  <>
-                    <span className="line-through text-gray-400">{s.price}</span>
-                    <span className="text-green-600">{s.discount}</span>
-                  </>
-                ) : (
-                  s.price
-                )}
-              </p>
+              <div className="flex justify-between items-center">
+                <p className="text-black font-semibold flex items-center gap-1">
+                  <IndianRupee size={16} />
+                  {s.discount ? (
+                    <>
+                      <span className="line-through text-gray-400">{s.price}</span>
+                      <span className="text-green-600">{s.discount}</span>
+                    </>
+                  ) : (
+                    s.price
+                  )}
+                </p>
+                <span className="text-xs text-gray-500">{s.duration_minutes} min</span>
+              </div>
 
-              <span className="text-xs text-gray-500">{s.duration_minutes} min</span>
-              
+              {/* Display badge if home visit is available */}
+              {s.home_visit_available && (
+                <span className="inline-block bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded">
+                  Home Visit Available
+                </span>
+              )}
             </div>
           ))}
         </div>

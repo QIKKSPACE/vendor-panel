@@ -16,6 +16,8 @@ import AcceptServiceRequests from "./components/AcceptServiceRequests";
 import { VendorFlowProvider } from "./context/VendorFlowContext";
 import Promotion from "./components/Promotion";
 import AcceptOrders from "./components/AcceptOrders";
+import Kyc from "./pages/Kyc";
+import PackageManagement from "./components/PackageManagement";
 
 export default function App() {
   return (
@@ -39,6 +41,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+                  <Route
+                path="/kyc"
+                element={
+                  <ProtectedRoute>
+                    <Kyc />
                   </ProtectedRoute>
                 }
               />
@@ -99,10 +109,34 @@ export default function App() {
                 }
               />
               <Route
+                path="/services/order"
+                element={
+                  <ProtectedRoute>
+                    <AcceptServiceRequests />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/promotion"
                 element={
                   <ProtectedRoute>
                     <Promotion />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/packages"
+                element={
+                  <ProtectedRoute>
+                    <PackageManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/products/packages"
+                element={
+                  <ProtectedRoute>
+                    <PackageManagement />
                   </ProtectedRoute>
                 }
               />
